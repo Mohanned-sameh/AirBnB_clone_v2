@@ -4,15 +4,17 @@ from datetime import datetime
 import os
 
 env.hosts = ["100.25.146.136", "54.237.38.206"]
+env.user = "ubuntu"
 
 
 def do_pack():
     """Function to compress files"""
     try:
-        date = datetime.now().strftime("%Y%m%d%H%M%S")
         local("mkdir -p versions")
-        local("tar -cvzf versions/web_static_{}.tgz web_static".format(date))
-        return "versions/web_static_{}.tgz".format(date)
+        date = datetime.now().strftime("%Y%m%d%H%M%S")
+        file = "versions/web_static_{}.tgz".format(date)
+        local("tar -cvzf {} web_static".format(file))
+        return file
     except BaseException:
         return None
 
@@ -22,30 +24,16 @@ def do_deploy(archive_path):
     if not os.path.exists(archive_path):
         return False
     try:
+        file = archive_path.split("/")[-1]
+        new_folder = "/data/web_static/releases/" + file.split(".")[0]
         put(archive_path, "/tmp/")
-        name = archive_path.split("/")[1].split(".")[0]
-        run("mkdir -p /data/web_static/releases/{}/".format(name))
-        run(
-            "tar -xzf /tmp/{}.tgz -C /data/web_static/releases/{}/".format(
-                name,
-                name,
-            )
-        )
-        run("rm /tmp/{}.tgz".format(name))
-        run(
-            "mv /data/web_static/releases/{}/web_static/*\
-            /data/web_static/releases/{}/".format(
-                name, name
-            )
-        )
-        run("rm -rf /data/web_static/releases/{}/web_static".format(name))
+        run("mkdir -p {}".format(new_folder))
+        run("tar -xzf /tmp/{} -C {}".format(file, new_folder))
+        run("rm /tmp/{}".format(file))
+        run("mv {}/web_static/* {}/".format(new_folder, new_folder))
+        run("rm -rf {}/web_static".format(new_folder))
         run("rm -rf /data/web_static/current")
-        run(
-            "ln -s /data/web_static/releases/{}/ \
-                /data/web_static/current".format(
-                name,
-            )
-        )
+        run("ln -s {} /data/web_static/current".format(new_folder))
         return True
     except BaseException:
         return False
