@@ -1,20 +1,17 @@
 #!/usr/bin/python3
-from fabric.api import *
-import os
+from fabric.api import env, put, run, local
 from datetime import datetime
+import os
 
 env.hosts = ["100.25.146.136", "54.237.38.206"]
-env.user = "ubuntu"
 
 
 def deploy():
     """Function to deploy"""
-    try:
-        archive_path = do_pack()
-        value = do_deploy(archive_path)
-        return value
-    except BaseException:
+    path = do_pack()
+    if path is None:
         return False
+    return do_deploy(path)
 
 
 def do_pack():
