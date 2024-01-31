@@ -6,48 +6,37 @@ from datetime import datetime
 from os.path import exists
 
 
-env.hosts = ["54.237.38.206", "100.25.146.136"]
+env.hosts = ["100.25.146.136", "54.237.38.206"]
 
 
 def do_pack():
-    """generates a .tgz archive from the contents of the web_static folder"""
-    local("sudo mkdir -p versions")
-    date = datetime.now().strftime("%Y%m%d%H%M%S")
-    filename = "versions/web_static_{}.tgz".format(date)
-    result = local("sudo tar -cvzf {} web_static".format(filename))
-    if result.succeeded:
-        return filename
-    else:
+    """generates a .tgz archive from the contents of the web_static"""
+    try:
+        local("mkdir -p versions")
+        date = datetime.now().strftime("%Y%m%d%H%M%S")
+        file_name = "versions/web_static_{}.tgz".format(date)
+        local("tar -cvzf {} web_static".format(file_name))
+        return file_name
+    except Exception:
         return None
 
 
 def do_deploy(archive_path):
-    """distributes an archive to my web servers"""
+    """distributes an archive to your web servers"""
     if exists(archive_path) is False:
-        return False  # Returns False if the file at archive_path doesnt exist
-    filename = archive_path.split("/")[-1]
-    # so now filename is <web_static_2021041409349.tgz>
-    no_tgz = "/data/web_static/releases/" + "{}".format(filename.split(".")[0])
-    # curr = '/data/web_static/current'
-    tmp = "/tmp/" + filename
-
+        return False
     try:
+        filename = archive_path.split("/")[-1]
+        no_ext = filename.split(".")[0]
+        path = "/data/web_static/releases/{}/".format(no_ext)
         put(archive_path, "/tmp/")
-        # ^ Upload the archive to the /tmp/ directory of the web server
-        run("mkdir -p {}/".format(no_tgz))
-        # Uncompress the archive to the folder /data/web_static/releases/
-        # <archive filename without extension> on the web server
-        run("tar -xzf {} -C {}/".format(tmp, no_tgz))
-        run("rm {}".format(tmp))
-        run("mv {}/web_static/* {}/".format(no_tgz, no_tgz))
-        run("rm -rf {}/web_static".format(no_tgz))
-        # ^ Delete the archive from the web server
-        run("rm -rf /data/web_static/current")
-        # Delete the symbolic link /data/web_static/current from the web server
-        run("ln -s {}/ /data/web_static/current".format(no_tgz))
-        # Create a new the symbolic link /data/web_static/current on the
-        # web server, linked to the new version of your code
-        # (/data/web_static/releases/<archive filename without extension>)
+        run("sudo mkdir -p {}".format(path))
+        run("sudo tar -xzf /tmp/{} -C {}".format(filename, path))
+        run("sudo rm /tmp/{}".format(filename))
+        run("sudo mv {}web_static/* {}".format(path, path))
+        run("sudo rm -rf {}web_static".format(path))
+        run("sudo rm -rf /data/web_static/current")
+        run("sudo ln -s {} /data/web_static/current".format(path))
         return True
     except Exception:
         return False
@@ -55,8 +44,7 @@ def do_deploy(archive_path):
 
 def deploy():
     """creates and distributes an archive to your web servers"""
-    new_archive_path = do_pack()
-    if exists(new_archive_path) is False:
+    archive_path = do_pack()
+    if archive_path is None:
         return False
-    result = do_deploy(new_archive_path)
-    return result
+    return do_deploy(archive_path)
