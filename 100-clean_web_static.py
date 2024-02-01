@@ -9,23 +9,6 @@ from os.path import exists
 env.hosts = ["100.25.146.136", "54.237.38.206"]
 
 
-def do_clean(number=0):
-    """Deletes out-of-date archives"""
-    number = int(number)
-    if number < 0:
-        return
-    elif number == 0 or number == 1:
-        local("cd versions; ls -t | tail -n +2 | xargs rm -rf")
-        run("cd /data/web_static/releases; ls -t | tail -n +2 | xargs rm -rf")
-    else:
-        local("cd versions; ls -t | tail -n +{} | xargs rm -rf".format(number + 1))
-        run(
-            "cd /data/web_static/releases; ls -t | tail -n +{} | xargs rm -rf".format(
-                number + 1
-            )
-        )
-
-
 def do_pack():
     """generates a .tgz archive from the contents of the web_static"""
     try:
@@ -65,3 +48,25 @@ def deploy():
     if archive_path is None:
         return False
     return do_deploy(archive_path)
+
+
+def do_clean(number=0):
+    """Deletes out-of-date archives"""
+    number = int(number)
+    if number < 0:
+        return
+    elif number == 0 or number == 1:
+        local("cd versions; ls -t | tail -n +2 | xargs rm -rf")
+        run("cd /data/web_static/releases; ls -t | tail -n +2 | xargs rm -rf")
+    else:
+        local(
+            "cd versions; ls -t | tail -n +{} | xargs rm -rf".format(
+                number + 1,
+            )
+        )
+        run(
+            "cd /data/web_static/releases; ls -t | tail -n +{} \
+                | xargs rm -rf".format(
+                number + 1,
+            )
+        )
