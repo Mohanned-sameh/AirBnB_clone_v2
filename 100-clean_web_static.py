@@ -54,8 +54,6 @@ def do_deploy(archive_path):
         run("rm /tmp/{}".format(filename))
 
         # Move the content of the folder
-        # /data/web_static/releases/<archive filename without extension>/web_static
-        # to the folder /data/web_static/releases/<archive filename without extension>
         run("mv {}/web_static/* {}/".format(folder_path, folder_path))
 
         # Delete the symbolic link /data/web_static/current from the web server
@@ -64,8 +62,6 @@ def do_deploy(archive_path):
         # Delete the old folder /data/web_static/current from the web server
         run("rm -rf /data/web_static/current")
 
-        # Create a new the symbolic link /data/web_static/current on the web server,
-        # linked to the new version of your code
         run("ln -s {} /data/web_static/current".format(folder_path))
 
         return True
@@ -97,7 +93,8 @@ def do_clean(number=0):
 
     local("cd versions; ls -t | tail -n +{} | xargs rm -rf --".format(number))
     run(
-        "cd /data/web_static/releases; ls -t | tail -n +{} | xargs rm -rf --".format(
+        "cd /data/web_static/releases; ls -t \
+            | tail -n +{} | xargs rm -rf --".format(
             number
         )
     )
