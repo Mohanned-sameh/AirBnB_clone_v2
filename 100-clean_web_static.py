@@ -7,6 +7,7 @@ from fabric.api import env, local, put, run
 env.hosts = ["100.24.74.133", "100.26.162.171"]
 
 
+@runs_once
 def do_pack():
     """Generates a .tgz archive from the contents of the web_static folder.
 
@@ -78,23 +79,25 @@ def deploy():
 
 
 def do_clean(number=0):
-    """Deletes out-of-date archives.
-
+    """Deletes out-of-date archives of the static files.
     Args:
-        number (int): Number of archives to keep.
+        number (Any): The number of archives to keep.
     """
-    number = int(number)
-    if number < 0:
-        return
-    elif number == 0 or number == 1:
-        number = 2
+    archives = os.listdir("versions/")
+    archives.sort(reverse=True)
+    start = int(number)
+    if not start:
+        start += 1
+    if start < len(archives):
+        archives = archives[start:]
     else:
-        number += 1
-
-    local("cd versions; ls -t | tail -n +{} | xargs rm -rf --".format(number))
-    run(
-        "cd /data/web_static/releases; ls -t \
-            | tail -n +{} | xargs rm -rf --".format(
-            number
-        )
-    )
+        archives = []
+    for archive in archives:
+        os.unlink("versions/{}".format(archive))
+    cmd_parts = [
+        "rm -rf $(",
+        "find /data/web_static/releases/ -maxdepth 1 -type d -iregex",
+        " '/data/web_static/releases/web_static_.*'",
+        " | sort -r | tr '\\n' ' ' | cut -d ' ' -f{}-)".format(start + 1),
+    ]
+    run("".join(cmd_parts))
