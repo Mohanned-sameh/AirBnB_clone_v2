@@ -1,20 +1,20 @@
 #!/usr/bin/python3
-"""class Flask"""
 from flask import Flask
-"""class Flask"""
 
+"""
+This script will start a Flask web application
+"""
 
 app = Flask(__name__)
 
 
-@app.route('/', strict_slashes=False)
+@app.route("/", strict_slashes=False)
 def hello_hbnb():
-    """displays text
-    Returns:
-        text
+    """
+    This function will return a string
     """
     return "Hello HBNB!"
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host="0.0.0.0", port=5000)

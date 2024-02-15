@@ -1,39 +1,40 @@
 #!/usr/bin/python3
 from flask import Flask
-"""class Flask"""
 
+"""
+This script will start a Flask web application
+"""
 
 app = Flask(__name__)
 
 
-@app.route('/', strict_slashes=False)
+@app.route("/", strict_slashes=False)
 def hello_hbnb():
-    """displays text
-    Returns:
-        text
+    """
+    This function will return a string
     """
     return "Hello HBNB!"
 
 
-@app.route('/hbnb', strict_slashes=False)
-def display_hbnb():
-    """displays text
-    Returns:
-        text
+@app.route("/hbnb", strict_slashes=False)
+def hbnb():
+    """
+    This function will return a string
     """
     return "HBNB"
 
 
-@app.route('/c/<text>', strict_slashes=False)
-def display_text(text):
-    """displays text
-    Args:
-        text (str): text
-    Returns:
-        text
+@app.route("/c/<text>", strict_slashes=False)
+def route_with_text(text):
     """
-    return 'C %s' % text.replace('_', ' ')
+    This function will return a string
+    """
+    if "_" in text:
+        text_no_underscore = text.replace("_", " ")
+        return "C " + text_no_underscore
+    else:
+        return "C " + text
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host="0.0.0.0", port=5000)
