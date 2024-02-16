@@ -20,33 +20,18 @@ class City(BaseModel, Base):
 
     __tablename__ = "cities"
     if type_of_storage == "db":
-        state_id = Column(
-            String(60),
-            ForeignKey("states.id"),
-            nullable=False,
-        )
-        name = Column(
-            String(128),
-            nullable=False,
-        )
-        places = relationship(
-            "Place",
-            backref="cities",
-            cascade="all, delete-orphan",
-        )
+        name = Column(String(128), nullable=False)
+        state_id = Column(String(60), ForeignKey("states.id"), nullable=False)
+        places = relationship("Place", backref="cities", cascade="all, delete")
     else:
         state_id = ""
         name = ""
+        places = []
 
         @property
-        def places(self):
+        def state(self):
             """
-            Returns the list of Place instances with city_id equals
-            to the current City.id
+            Getter for the state.
             """
-            places = models.storage.all(Place)
-            places_lista = []
-            for place in places.values():
-                if place.city_id == self.id:
-                    places_lista.append(place)
-            return places_lista
+            state = models.storage.get("State", self.state_id)
+            return state
