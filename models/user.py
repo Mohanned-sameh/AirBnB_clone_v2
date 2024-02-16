@@ -15,43 +15,61 @@ type_of_storage = getenv("HBNB_TYPE_STORAGE")
 
 class User(BaseModel, Base):
     """
-    Implementation for the User.
+    Definition of the User class
     """
 
     __tablename__ = "users"
+    email = Column(
+        String(128),
+        nullable=False,
+    )
+    password = Column(
+        String(128),
+        nullable=False,
+    )
+    first_name = Column(
+        String(128),
+        nullable=True,
+    )
+    last_name = Column(
+        String(128),
+        nullable=True,
+    )
     if type_of_storage == "db":
-        email = Column(String(128), nullable=False)
-        password = Column(String(128), nullable=False)
-        first_name = Column(String(128), nullable=True)
-        last_name = Column(String(128), nullable=True)
-        places = relationship("Place", backref="user", cascade="all, delete")
-        reviews = relationship("Review", backref="user", cascade="all, delete")
+        places = relationship(
+            "Place",
+            backref="user",
+            cascade="all, delete-orphan",
+        )
+        reviews = relationship(
+            "Review",
+            backref="user",
+            cascade="all, delete-orphan",
+        )
     else:
-        email = ""
-        password = ""
-        first_name = ""
-        last_name = ""
-        places = []
-        reviews = []
 
-    @property
-    def reviews(self):
-        """
-        Getter for the reviews.
-        """
-        review_list = []
-        for review in models.storage.all(Review).values():
-            if review.user_id == self.id:
-                review_list.append(review)
-        return review_list
+        @property
+        def places(self):
+            """
+            Returns the list of Place instances with user_id equals
+            to the current User.id
+            """
+            places = models.storage.all(Place)
+            places_lista = []
+            for place in places.values():
+                if place.user_id == self.id:
+                    places_lista.append(place)
+            return places_lista
 
-    @property
-    def places(self):
-        """
-        Getter for the places.
-        """
-        place_list = []
-        for place in models.storage.all(Place).values():
-            if place.user_id == self.id:
-                place_list.append(place)
-        return place_list
+        @property
+        def reviews(self):
+            """
+            Returns the list of Review instances with user_id equals
+            to the current User.id
+            """
+            reviews = models.storage.all(Review)
+            reviews_lista = []
+            for review in reviews.values():
+                if review.user_id == self.id:
+                    reviews_lista.append(review)
+            return reviews_lista

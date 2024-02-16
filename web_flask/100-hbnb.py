@@ -16,7 +16,7 @@ def tear_down(self):
     storage.close()
 
 
-@app.route("/hbnb", strict_slashes=False)
+@app.route('/hbnb', strict_slashes=False)
 def show_page():
     """displays webpage
     Returns:
@@ -35,13 +35,9 @@ def show_page():
         all_amenities.append(v)
     for k, v in dict_places.items():
         all_places.append(v)
-    return render_template(
-        "100-hbnb.html",
-        all_states=all_states,
-        all_amenities=all_amenities,
-        all_places=all_places,
-    )
+    return render_template('100-hbnb.html', all_states=all_states,
+                           all_amenities=all_amenities, all_places=all_places)
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host='0.0.0.0', port=5000)

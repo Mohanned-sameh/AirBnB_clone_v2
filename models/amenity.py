@@ -13,57 +13,28 @@ type_of_storage = getenv("HBNB_TYPE_STORAGE")
 
 class Amenity(BaseModel, Base):
     """
-    Implementation for the Amenity.
+    Implementation for the Amenities.
     """
 
     __tablename__ = "amenities"
+    name = Column(String(128), nullable=False)
     if type_of_storage == "db":
-        name = Column(String(128), nullable=False)
-        place_amenities = Table(
-            "place_amenity",
-            Base.metadata,
-            Column(
-                "place_id",
-                String(60),
-                ForeignKey("places.id"),
-                primary_key=True,
-                nullable=False,
-            ),
-            Column(
-                "amenity_id",
-                String(60),
-                ForeignKey("amenities.id"),
-                primary_key=True,
-                nullable=False,
-            ),
-        )
-        place = relationship(
+        place_amenities = relationship(
             "Place",
-            secondary=place_amenities,
-            viewonly=False,
+            secondary="place_amenity",
             back_populates="amenities",
         )
     else:
-        name = ""
-
-        @property
-        def place(self):
-            """
-            Getter for the place.
-            """
-            place_list = []
-            for place in models.storage.all(Place).values():
-                if place.amenity_id == self.id:
-                    place_list.append(place)
-            return place_list
 
         @property
         def place_amenities(self):
             """
-            Getter for the place_amenities.
+            Returns the list of Amenity instances with amenity_id equals
+            to the current Amenity.id
             """
-            place_amenities_list = []
-            for place_amenity in models.storage.all(Place).values():
-                if place_amenity.amenity_id == self.id:
-                    place_amenities_list.append(place_amenity)
-            return place_amenities_list
+            amenities = models.storage.all(Amenity)
+            amenities_lista = []
+            for amenity in amenities.values():
+                if amenity.amenity_id == self.id:
+                    amenities_lista.append(amenity)
+            return amenities_lista
