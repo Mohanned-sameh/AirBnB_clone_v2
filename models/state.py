@@ -1,32 +1,39 @@
 #!/usr/bin/python3
-"""This is the state class"""
-import os
+"""Defines the State class."""
 import models
-from models.base_model import BaseModel, Base
-from sqlalchemy import Column, String, Integer
+from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
+from models.base_model import BaseModel, Base
+from models.city import City
+from os import getenv
 
 
 class State(BaseModel, Base):
-    """This is the class for State
-    Attributes:
-        name: input name
-    """
+    """Represents a state for a MySQL database.
 
+    Inherits from SQLAlchemy Base and links to the MySQL table states.
+
+    Attributes:
+        __tablename__ (str): The name of the MySQL table to store States.
+        name (sqlalchemy String): The name of the State.
+        cities (sqlalchemy relationship): The State-City relationship.
+    """
     __tablename__ = "states"
     name = Column(String(128), nullable=False)
-    cities = relationship("City", backref="state")
 
-    if os.getenv("HBNB_TYPE_STORAGE") != "db":
-
+    if getenv("HBNB_TYPE_STORAGE") == "db":
+        cities = relationship("City", backref="state", cascade="all, delete")
+    else:
         @property
         def cities(self):
-            """getter attribute cities that returns the list of City instances"""
+            """Get a list of City instances with
+                state_id equals to the current State.id.
+
+            This is a getter attribute for FileStorage
+                relationship between State and City.
+            """
             city_list = []
-            for city in list(models.storage.all(City).values()):
+            for city in models.storage.all(City).values():
                 if city.state_id == self.id:
                     city_list.append(city)
             return city_list
-
-    else:
-        cities = relationship("City", backref="state", cascade="all, delete")
