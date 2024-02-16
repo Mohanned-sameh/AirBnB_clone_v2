@@ -18,6 +18,7 @@ class FileStorage:
         __file_path: path to the JSON file
         __objects: objects will be stored
     """
+
     __file_path = "file.json"
     __objects = {}
 
@@ -33,7 +34,7 @@ class FileStorage:
             if len(self.__objects) > 0:
                 for key, value in self.__objects.items():
                     if type(cls) is str:
-                        if cls == key.split('.')[0]:
+                        if cls == key.split(".")[0]:
                             new_dict[key] = value
                     else:
                         if cls is type(value):
@@ -50,19 +51,17 @@ class FileStorage:
             self.__objects[key] = obj
 
     def save(self):
-        """serialize the file path to JSON file path
-        """
+        """serialize the file path to JSON file path"""
         my_dict = {}
         for key, value in self.__objects.items():
             my_dict[key] = value.to_dict()
-        with open(self.__file_path, 'w', encoding="UTF-8") as f:
+        with open(self.__file_path, "w", encoding="UTF-8") as f:
             json.dump(my_dict, f)
 
     def reload(self):
-        """serialize the file path to JSON file path
-        """
+        """serialize the file path to JSON file path"""
         try:
-            with open(self.__file_path, 'r', encoding="UTF-8") as f:
+            with open(self.__file_path, "r", encoding="UTF-8") as f:
                 for key, value in (json.load(f)).items():
                     value = eval(value["__class__"])(**value)
                     self.__objects[key] = value
@@ -82,5 +81,5 @@ class FileStorage:
             del self.__objects[dict_key]
 
     def close(self):
-        """ calls reload() for deserializing the JSON file to objects."""
+        """call reload method for deserializing the JSON file to objects"""
         self.reload()

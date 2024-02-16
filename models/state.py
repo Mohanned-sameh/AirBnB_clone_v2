@@ -11,25 +11,22 @@ class State(BaseModel, Base):
     """This is the class for State
     Attributes:
         name: input name
-        cities = relationship between state and city tables.
     """
 
-    __tablename__ = 'states'
-    if os.getenv('HBNB_TYPE_STORAGE') == 'db':
-        name = Column(String(128), nullable=False)
-        cities = relationship(
-            'City', back_populates='state',
-            cascade='all, delete, delete-orphan')
+    __tablename__ = "states"
+    name = Column(String(128), nullable=False)
+    cities = relationship("City", backref="state")
 
-    else:
-        name = ""
+    if os.getenv("HBNB_TYPE_STORAGE") != "db":
 
         @property
         def cities(self):
-            """returns list of Cities and some relationships"""
-            cities_instances = []
-            cities_dict = models.storage.all(models.City)
-            for key, value in cities_dict.items():
-                if self.id == value.state_id:
-                    cities_instances.append(value)
-            return cities_instances
+            """getter attribute cities that returns the list of City instances"""
+            city_list = []
+            for city in list(models.storage.all(City).values()):
+                if city.state_id == self.id:
+                    city_list.append(city)
+            return city_list
+
+    else:
+        cities = relationship("City", backref="state", cascade="all, delete")
