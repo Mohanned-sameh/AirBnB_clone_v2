@@ -14,7 +14,9 @@ app = Flask(__name__)
 def states_list():
     """display a HTML page: (inside the tag BODY)"""
     states = storage.all("State")
-    return render_template("7-states_list.html", states=states)
+    if states is not None:
+        return render_template("7-states_list.html", states=states)
+    return "Not found"
 
 
 @app.teardown_appcontext
